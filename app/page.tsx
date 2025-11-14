@@ -3,6 +3,7 @@ import { HeroSection } from "@/components/HeroSection";
 
 export default function Home() {
   const menuItems = [
+    { label: "Artists", href: "/artists" },
     { label: "Join Us", href: "/join-us" },
     { label: "Updates", href: "/updates" },
     { label: "Contact Us", href: "/contact-us" },
@@ -26,7 +27,7 @@ export default function Home() {
       </div>
 
       {/* Hero Section */}
-      <HeroSection title="BADINVSTMENT" menuItems={menuItems} />
+      <HeroSection title="BADINVSTMENT DASHBOARD" menuItems={menuItems} />
     </div>
   );
 }

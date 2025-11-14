@@ -11,6 +11,7 @@ type HeaderNavProps = {
 };
 
 const menuItems: NavItem[] = [
+  { label: "Artists", href: "/artists" },
   { label: "Join Us", href: "/join-us" },
   { label: "Updates", href: "/updates" },
   { label: "Contact Us", href: "/contact-us" },
