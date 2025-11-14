@@ -15,6 +15,7 @@ export async function GET() {
         date: data.date || "",
         title: data.title || "",
         url: data.url || "",
+        imageUrl: data.imageUrl || "",
         isAvailable: data.isAvailable || false,
         createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
         updatedAt: data.updatedAt?.toDate?.()?.toISOString() || null,
@@ -41,7 +42,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { date, title, url, isAvailable } = body;
+    const { date, title, url, imageUrl, isAvailable } = body;
 
     // Validate required fields
     if (!date || !title) {
@@ -56,6 +57,7 @@ export async function POST(request: NextRequest) {
       date: date.trim(),
       title: title.trim(),
       url: url?.trim() || "",
+      imageUrl: imageUrl || "",
       isAvailable: isAvailable || false,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
@@ -82,7 +84,7 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const body = await request.json();
-    const { id, date, title, url, isAvailable } = body;
+    const { id, date, title, url, imageUrl, isAvailable } = body;
 
     // Validate required fields
     if (!id) {
@@ -104,6 +106,7 @@ export async function PUT(request: NextRequest) {
       date: date.trim(),
       title: title.trim(),
       url: url?.trim() || "",
+      imageUrl: imageUrl || "",
       isAvailable: isAvailable || false,
       updatedAt: serverTimestamp(),
     });

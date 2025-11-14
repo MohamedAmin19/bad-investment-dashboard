@@ -9,6 +9,7 @@ type Update = {
   date: string;
   title: string;
   url: string;
+  imageUrl: string;
   isAvailable: boolean;
   createdAt: string | null;
   updatedAt: string | null;
@@ -24,8 +25,10 @@ export default function UpdatesPage() {
     date: "",
     title: "",
     url: "",
+    imageUrl: "",
     isAvailable: false,
   });
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
@@ -48,6 +51,76 @@ export default function UpdatesPage() {
       setError("Network error. Please try again.");
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Compress and convert image to base64
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const maxWidth = 800;
+          const maxHeight = 800;
+          let width = img.width;
+          let height = img.height;
+
+          // Calculate new dimensions
+          if (width > height) {
+            if (width > maxWidth) {
+              height = (height * maxWidth) / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width = (width * maxHeight) / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+
+          const ctx = canvas.getContext("2d");
+          ctx?.drawImage(img, 0, 0, width, height);
+
+          // Convert to base64 with quality compression
+          const base64 = canvas.toDataURL("image/jpeg", 0.7);
+          
+          // Check size (Firestore limit is 1MB, but we'll keep it under 800KB to be safe)
+          if (base64.length > 800000) {
+            // Further compress if still too large
+            const compressed = canvas.toDataURL("image/jpeg", 0.5);
+            resolve(compressed);
+          } else {
+            resolve(base64);
+          }
+        };
+        img.onerror = reject;
+      };
+      reader.onerror = reject;
+    });
+  };
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        setMessage({ type: "error", text: "Image size must be less than 5MB" });
+        return;
+      }
+
+      try {
+        const base64 = await compressImage(file);
+        setFormData({ ...formData, imageUrl: base64 });
+        setImagePreview(base64);
+      } catch (error) {
+        setMessage({ type: "error", text: "Failed to process image" });
+      }
     }
   };
 
@@ -77,7 +150,8 @@ export default function UpdatesPage() {
         setMessage({ type: "success", text: data.message || "Update saved successfully!" });
         setIsFormOpen(false);
         setEditingUpdate(null);
-        setFormData({ date: "", title: "", url: "", isAvailable: false });
+        setFormData({ date: "", title: "", url: "", imageUrl: "", isAvailable: false });
+        setImagePreview(null);
         fetchUpdates();
       } else {
         setMessage({ type: "error", text: data.error || "Something went wrong. Please try again." });
@@ -95,8 +169,10 @@ export default function UpdatesPage() {
       date: update.date,
       title: update.title,
       url: update.url,
+      imageUrl: update.imageUrl,
       isAvailable: update.isAvailable,
     });
+    setImagePreview(update.imageUrl || null);
     setIsFormOpen(true);
   };
 
@@ -126,7 +202,8 @@ export default function UpdatesPage() {
   const handleCancel = () => {
     setIsFormOpen(false);
     setEditingUpdate(null);
-    setFormData({ date: "", title: "", url: "", isAvailable: false });
+    setFormData({ date: "", title: "", url: "", imageUrl: "", isAvailable: false });
+    setImagePreview(null);
     setMessage(null);
   };
 
@@ -222,6 +299,27 @@ export default function UpdatesPage() {
                       <span className="text-sm font-medium">Is Available</span>
                     </label>
                   </div>
+                  <div>
+                    <label htmlFor="image" className="block mb-2 text-sm font-medium">
+                      Image (Max 5MB, will be compressed)
+                    </label>
+                    <input
+                      type="file"
+                      id="image"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-white text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-white file:text-black hover:file:bg-gray-200"
+                    />
+                    {imagePreview && (
+                      <div className="mt-2">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="max-w-xs max-h-48 object-contain rounded-lg border border-gray-700"
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="flex gap-4">
                   <button
@@ -254,6 +352,7 @@ export default function UpdatesPage() {
                   <tr className="border-b border-white">
                     <th className="px-4 py-3 text-left text-white font-normal">Date</th>
                     <th className="px-4 py-3 text-left text-white font-normal">Title</th>
+                    <th className="px-4 py-3 text-left text-white font-normal">Image</th>
                     <th className="px-4 py-3 text-left text-white font-normal">URL</th>
                     <th className="px-4 py-3 text-left text-white font-normal">Available</th>
                     <th className="px-4 py-3 text-left text-white font-normal">Actions</th>
@@ -262,7 +361,7 @@ export default function UpdatesPage() {
                 <tbody>
                   {updates.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-4 py-8 text-center text-white border-b border-white">
+                      <td colSpan={6} className="px-4 py-8 text-center text-white border-b border-white">
                         No updates found
                       </td>
                     </tr>
@@ -274,6 +373,17 @@ export default function UpdatesPage() {
                       >
                         <td className="px-4 py-3 text-white">{update.date}</td>
                         <td className="px-4 py-3 text-white">{update.title}</td>
+                        <td className="px-4 py-3 text-white">
+                          {update.imageUrl ? (
+                            <img
+                              src={update.imageUrl}
+                              alt={update.title}
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+                          ) : (
+                            "N/A"
+                          )}
+                        </td>
                         <td className="px-4 py-3 text-white">
                           {update.url ? (
                             <a
