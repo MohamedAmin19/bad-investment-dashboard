@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 type NavItem = {
   label: string;
@@ -22,6 +25,13 @@ const menuItems: NavItem[] = [
 ];
 
 export function HeaderNav({ brand = "BadInvestment", className }: HeaderNavProps) {
+  const router = useRouter();
+
+  const handleLogout = () => {
+    localStorage.removeItem("isAuthenticated");
+    router.push("/login");
+  };
+
   return (
     <header
       className={`flex items-center justify-between gap-6 text-white ${
@@ -48,6 +58,12 @@ export function HeaderNav({ brand = "BadInvestment", className }: HeaderNavProps
             {item.label}
           </Link>
         ))}
+        <button
+          onClick={handleLogout}
+          className="px-4 py-2 bg-red-600/20 border border-red-600/50 rounded-lg hover:bg-red-600/30 transition-colors text-sm"
+        >
+          Logout
+        </button>
       </nav>
     </header>
   );
