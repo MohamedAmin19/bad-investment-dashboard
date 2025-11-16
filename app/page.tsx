@@ -9,6 +9,8 @@ export default function Home() {
     { label: "Contact Us", href: "/contact-us" },
     { label: "Submit Music", href: "/submit-music" },
     { label: "Tour", href: "/tour" },
+    { label: "Store", href: "/store" },
+    { label: "Orders", href: "/orders" },
   ];
 
   return (

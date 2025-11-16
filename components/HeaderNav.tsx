@@ -17,6 +17,8 @@ const menuItems: NavItem[] = [
   { label: "Contact Us", href: "/contact-us" },
   { label: "Submit Music", href: "/submit-music" },
   { label: "Tour", href: "/tour" },
+  { label: "Store", href: "/store" },
+  { label: "Orders", href: "/orders" },
 ];
 
 export function HeaderNav({ brand = "BadInvestment", className }: HeaderNavProps) {
