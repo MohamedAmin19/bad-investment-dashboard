@@ -437,7 +437,7 @@ export default function StorePage() {
                           {product.description || "N/A"}
                         </td>
                         <td className="px-4 py-3 text-white">{product.stock}</td>
-                        <td className="px-4 py-3 text-white">${product.price.toFixed(2)}</td>
+                        <td className="px-4 py-3 text-white">{product.price.toFixed(2)} EGP</td>
                         <td className="px-4 py-3 text-white">
                           <div className="flex gap-2">
                             <button

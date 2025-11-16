@@ -24,6 +24,9 @@ type Order = {
   id: string;
   customerInfo: CustomerInfo;
   items: OrderItem[];
+  paymentMethod?: string;
+  subtotal: number;
+  shippingFee: number;
   total: number;
   status: "pending" | "processing" | "shipped" | "delivered" | "cancelled";
   createdAt: string | null;
@@ -174,7 +177,7 @@ export default function OrdersPage() {
                             {order.items.length} item(s)
                           </td>
                           <td className="px-4 py-3 text-white">
-                            ${order.total.toFixed(2)}
+                            {order.total.toFixed(2)} EGP
                           </td>
                           <td className="px-4 py-3 text-white">
                             <span className={getStatusColor(order.status)}>
@@ -238,21 +241,41 @@ export default function OrdersPage() {
                                         <div className="flex-1">
                                           <div className="font-medium">{item.name}</div>
                                           <div className="text-sm text-gray-400">
-                                            Quantity: {item.quantity} × ${item.price.toFixed(2)} = ${(item.quantity * item.price).toFixed(2)}
+                                            Quantity: {item.quantity} × {item.price.toFixed(2)} EGP = {(item.quantity * item.price).toFixed(2)} EGP
                                           </div>
                                         </div>
                                       </div>
                                     ))}
                                   </div>
                                 </div>
+                                <div>
+                                  <h3 className="text-lg font-semibold mb-2">Payment & Pricing</h3>
+                                  <div className="space-y-2 text-sm">
+                                    {order.paymentMethod !== null && order.paymentMethod !== undefined && (
+                                      <div className="flex justify-between">
+                                        <span className="text-gray-400">Payment Method:</span>
+                                        <span className="text-white capitalize">{order.paymentMethod}</span>
+                                      </div>
+                                    )}
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-400">Subtotal:</span>
+                                      <span className="text-white">{order.subtotal.toFixed(2)} EGP</span>
+                                    </div>
+                                    <div className="flex justify-between">
+                                      <span className="text-gray-400">Shipping Fee:</span>
+                                      <span className="text-white">{order.shippingFee.toFixed(2)} EGP</span>
+                                    </div>
+                                    <div className="flex justify-between pt-2 border-t border-gray-700 text-lg font-semibold">
+                                      <span>Total:</span>
+                                      <span>{order.total.toFixed(2)} EGP</span>
+                                    </div>
+                                  </div>
+                                </div>
                                 <div className="flex justify-between items-center pt-2 border-t border-gray-700">
-                                  <div className="text-lg font-semibold">
-                                    Total: ${order.total.toFixed(2)}
+                                  <div className="text-sm text-gray-400">
+                                    Status: <span className={getStatusColor(order.status)}>{order.status}</span>
                                   </div>
                                   <div className="flex items-center gap-4">
-                                    <div className="text-sm text-gray-400">
-                                      Status: <span className={getStatusColor(order.status)}>{order.status}</span>
-                                    </div>
                                     <select
                                       value={order.status}
                                       onChange={(e) => handleStatusChange(order.id, e.target.value)}

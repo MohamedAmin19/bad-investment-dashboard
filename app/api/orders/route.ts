@@ -20,7 +20,10 @@ export async function GET() {
           city: "",
         },
         items: data.items || [],
-        total: data.total || 0,
+        paymentMethod: data.paymentMethod !== undefined ? data.paymentMethod : null,
+        subtotal: data.subtotal !== undefined ? Number(data.subtotal) : 0,
+        shippingFee: data.shippingFee !== undefined ? Number(data.shippingFee) : 0,
+        total: data.total !== undefined ? Number(data.total) : 0,
         status: data.status || "pending",
         createdAt: data.createdAt?.toDate?.()?.toISOString() || null,
       };
